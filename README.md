@@ -1,8 +1,8 @@
-# JobRadar - 就活企業発見アプリ
+# CariNodeX - 就活企業発見アプリ
 
 AIがあなたの興味に合った企業をレコメンドする、理系修士学生向けの就活支援Webアプリです。
 
-**https://jobradar-xi.vercel.app**
+**https://carinodex.vercel.app**
 
 ## 主な機能
 

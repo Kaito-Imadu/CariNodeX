@@ -1,6 +1,6 @@
 import { AppData, SavedCompany, UserProfile, ReviewHistoryItem, CompanySearchResult } from "@/types";
 
-const STORAGE_KEY = "jobradar_data";
+const STORAGE_KEY = "carinodex_data";
 const CURRENT_VERSION = 1;
 
 function getDefaultProfile(): UserProfile {

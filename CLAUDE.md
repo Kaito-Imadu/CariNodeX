@@ -1,4 +1,4 @@
-# JobRadar - 開発ガイド
+# CariNodeX - 開発ガイド
 
 ## プロジェクト概要
 

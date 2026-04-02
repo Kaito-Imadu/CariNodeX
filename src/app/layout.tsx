@@ -21,10 +21,10 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
-  title: "JobRadar - 就活企業発見アプリ",
+  title: "CariNodeX - 就活企業発見アプリ",
   description: "AIがあなたに最適な企業をレコメンド。興味キーワードから理想の就職先を見つけよう。",
   openGraph: {
-    title: "JobRadar - 就活企業発見アプリ",
+    title: "CariNodeX - 就活企業発見アプリ",
     description: "AIがあなたに最適な企業をレコメンド",
     type: "website",
   },
