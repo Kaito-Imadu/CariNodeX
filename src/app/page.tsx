@@ -64,7 +64,7 @@ export default function HomePage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8 pb-24 md:pb-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">
-          <span className="text-primary">Job</span>Radar
+          <span className="text-primary">Cari</span>NodeX
         </h1>
         <div className="flex flex-col items-center justify-center py-24 animate-fade-in">
           <div className="w-24 h-24 rounded-3xl bg-primary/10 flex items-center justify-center mb-6">
