@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JobRadar - 就活企業発見アプリ
 
-## Getting Started
+AIがあなたの興味に合った企業をレコメンドする、理系修士学生向けの就活支援Webアプリです。
 
-First, run the development server:
+## 主な機能
+
+- **企業検索** - 興味キーワードと企業規模を選ぶと、Gemini AIが最適な企業を10社レコメンド
+- **企業詳細** - 技術スタック、採用情報、待遇、選考対策ヒントをAIが動的に生成
+- **マイリスト** - 気になる企業を登録して選考ステータスを一元管理
+- **プロフィール** - ガクチカ・スキル・資格を登録してES添削に活用
+- **ES添削** - 登録したガクチカを特定企業向けにAIが添削、Before/After比較で改善点を可視化
+
+## 技術スタック
+
+| レイヤー | 技術 |
+|---|---|
+| フレームワーク | Next.js 16 (App Router) |
+| 言語 | TypeScript |
+| スタイリング | Tailwind CSS 4 |
+| AI | Gemini API (`gemini-2.0-flash`) |
+| データ永続化 | localStorage |
+| デプロイ | Vercel |
+
+## セットアップ
 
 ```bash
+# 依存関係のインストール
+npm install
+
+# 環境変数の設定
+cp .env.local.example .env.local
+# .env.local に GEMINI_API_KEY を設定
+
+# 開発サーバー起動
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+http://localhost:3000 でアプリが起動します。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 環境変数
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| 変数名 | 説明 |
+|---|---|
+| `GEMINI_API_KEY` | Google Gemini APIキー（サーバーサイドのみで使用） |
 
-## Learn More
+## ディレクトリ構成
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/           # ページ・APIルート
+│   ├── api/       # Route Handlers (search, company, review)
+│   ├── company/   # 企業詳細ページ
+│   ├── discover/  # 企業検索ページ
+│   ├── profile/   # プロフィールページ
+│   └── review/    # ES添削ページ
+├── components/    # UIコンポーネント
+│   └── ui/        # 共通UIコンポーネント
+├── lib/           # ユーティリティ (Gemini API, localStorage, プロンプト)
+├── types/         # TypeScript型定義
+└── hooks/         # カスタムフック
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## デザイン
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- ダークモードベースのUI（Glassmorphism）
+- Noto Sans JP + Geist フォント
+- モバイルファースト・レスポンシブ対応
+- ページ遷移アニメーション・ホバーエフェクト
 
-## Deploy on Vercel
+## ライセンス
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
