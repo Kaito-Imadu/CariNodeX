@@ -15,7 +15,7 @@
 
 - **フレームワーク**: Next.js 16 (App Router) + TypeScript
 - **スタイリング**: Tailwind CSS 4（ダークモード、Glassmorphismベース）
-- **AI**: Gemini API (`gemini-2.0-flash`) を Route Handler (`/api/*`) 経由で呼び出し。APIキーはサーバーサイドのみ
+- **AI**: Gemini API (`gemini-2.5-flash`) を Route Handler (`/api/*`) 経由で呼び出し。APIキーはサーバーサイドのみ
 - **データ永続化**: localStorage（`lib/storage.ts` で一元管理、バージョン番号付き）
 - **プロンプト管理**: `lib/prompts.ts` に全プロンプトテンプレートを集約
 
