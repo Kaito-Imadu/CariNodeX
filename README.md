@@ -2,7 +2,7 @@
 
 AIがあなたの興味に合った企業をレコメンドする、理系修士学生向けの就活支援Webアプリです。
 
-**https://carinodex.vercel.app**
+**https://carinodex-xi.vercel.app**
 
 ## 主な機能
 
