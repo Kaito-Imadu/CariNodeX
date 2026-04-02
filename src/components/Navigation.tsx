@@ -16,7 +16,7 @@ export function Navigation() {
   return (
     <>
       {/* Desktop nav */}
-      <header className="hidden md:block sticky top-0 z-50 glass">
+      <header className="hidden md:block sticky top-0 z-50 glass border-b border-border">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center group-hover:animate-pulse-glow transition-all">

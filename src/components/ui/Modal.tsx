@@ -39,7 +39,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       className="fixed inset-0 z-[100] flex items-center justify-center p-4"
       onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
     >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="relative glass rounded-2xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto animate-slide-up">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-bold">{title}</h2>
