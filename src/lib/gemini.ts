@@ -1,6 +1,14 @@
-export async function callGemini(prompt: string): Promise<string> {
+export async function callGemini(prompt: string, options?: { jsonMode?: boolean }): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
+
+  const generationConfig: Record<string, unknown> = {
+    temperature: 0.7,
+    maxOutputTokens: 8192,
+  };
+  if (options?.jsonMode !== false) {
+    generationConfig.responseMimeType = "application/json";
+  }
 
   const res = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -9,11 +17,7 @@ export async function callGemini(prompt: string): Promise<string> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 8192,
-          responseMimeType: "application/json",
-        },
+        generationConfig,
       }),
     }
   );

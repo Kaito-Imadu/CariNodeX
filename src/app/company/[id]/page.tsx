@@ -8,7 +8,8 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Textarea } from "@/components/ui/Textarea";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { isCompanySaved, saveCompany, removeCompany, updateCompany, getSavedCompanies } from "@/lib/storage";
+import { isCompanySaved, saveCompany, removeCompany, updateCompany, getSavedCompanies, getCachedCompanyDetail, setCachedCompanyDetail } from "@/lib/storage";
+import { CompanyChat } from "@/components/CompanyChat";
 import Link from "next/link";
 
 export default function CompanyDetailPage() {
@@ -45,13 +46,22 @@ function CompanyDetailContent() {
 
   useEffect(() => {
     if (!companyName) return;
+    const cached = getCachedCompanyDetail(id);
+    if (cached) {
+      setDetail(cached);
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     fetch(`/api/company/${id}?name=${encodeURIComponent(companyName)}`)
       .then((res) => {
         if (!res.ok) throw new Error("企業情報の取得に失敗しました");
         return res.json();
       })
-      .then((data) => setDetail(data))
+      .then((data) => {
+        setDetail(data);
+        setCachedCompanyDetail(id, data);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setIsLoading(false));
   }, [id, companyName]);
@@ -185,8 +195,10 @@ function CompanyDetailContent() {
             </div>
           ))}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoItem label="インターン時期" value={d.recruitment.intern_period} />
+          <InfoItem label="応募締切目安" value={d.recruitment.application_deadline} />
+          <InfoItem label="面接スケジュール" value={d.recruitment.interview_schedule} />
           <InfoItem label="選考フロー" value={d.recruitment.selection_flow} />
           <InfoItem label="採用人数" value={d.recruitment.hiring_count} />
         </div>
@@ -236,9 +248,14 @@ function CompanyDetailContent() {
       <Card>
         <SectionTitle>外部リンク</SectionTitle>
         <div className="flex flex-wrap gap-3">
+          {d.links.corporate_site && (
+            <a href={d.links.corporate_site} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" size="sm">公式サイト</Button>
+            </a>
+          )}
           {d.links.career_page && (
             <a href={d.links.career_page} target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm">公式採用ページ</Button>
+              <Button variant="outline" size="sm">採用ページ</Button>
             </a>
           )}
           <a href={d.links.openwork_search} target="_blank" rel="noopener noreferrer">
@@ -249,6 +266,9 @@ function CompanyDetailContent() {
           </a>
         </div>
       </Card>
+
+      {/* Chat */}
+      <CompanyChat companyName={companyName} companyDetail={d} />
 
       {/* Memo */}
       {saved && (

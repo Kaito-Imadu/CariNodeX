@@ -1,4 +1,36 @@
-import { ReviewCriteria } from "@/types";
+import { ReviewCriteria, CompanyDetail } from "@/types";
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export function buildChatPrompt(
+  companyName: string,
+  companyDetail: CompanyDetail,
+  history: ChatMessage[],
+  question: string
+): string {
+  const contextJson = JSON.stringify(companyDetail, null, 2);
+  const historyText = history
+    .map((m) => `${m.role === "user" ? "ユーザー" : "アシスタント"}: ${m.content}`)
+    .join("\n");
+
+  return `あなたは「${companyName}」について詳しいキャリアアドバイザーです。
+就活生からの質問に、以下の企業情報をもとに日本語で簡潔に回答してください。
+
+【企業情報】
+${contextJson}
+
+${historyText ? `【会話履歴】\n${historyText}\n` : ""}
+【質問】
+${question}
+
+【注意事項】
+- 企業情報に含まれない内容については「確認できませんでした」と正直に答えてください
+- 回答は簡潔に（3〜5文程度）、就活生にとって実用的な内容にしてください
+- JSON形式ではなく、普通のテキストで回答してください`;
+}
 
 export function buildSearchPrompt(keywords: string, sizes: string[]): string {
   return `あなたは日本の就活に詳しいキャリアアドバイザーです。
@@ -52,9 +84,9 @@ export function buildCompanyDetailPrompt(companyName: string): string {
     "description": "業界・事業領域の説明（3〜4文）"
   },
   "technology": {
-    "tech_stack": ["主要技術1", "主要技術2"],
+    "tech_stack": ["使用技術を制限なくすべて列挙"],
     "products": [
-      {"name": "プロダクト名", "description": "簡単な説明"}
+      {"name": "プロダクト/サービス名", "description": "簡単な説明"}
     ],
     "tech_blog_url": "技術ブログURL（あれば、なければnull）",
     "github_url": "GitHubのURL（あれば、なければnull）"
@@ -63,7 +95,9 @@ export function buildCompanyDetailPrompt(companyName: string): string {
     "positions": [
       {"title": "職種名", "description": "業務内容の簡単な説明"}
     ],
-    "intern_period": "例年のインターン実施時期",
+    "intern_period": "例年のインターン実施時期（具体的な月を記載。例: 夏期: 8月上旬〜9月中旬、冬期: 12月〜1月）",
+    "application_deadline": "エントリー・ES提出締切の目安（夏インターン、本選考それぞれ）",
+    "interview_schedule": "面接の実施時期と回数の目安",
     "selection_flow": "選考フローの概要",
     "hiring_count": "採用人数の目安（わかる範囲で）"
   },
@@ -80,7 +114,8 @@ export function buildCompanyDetailPrompt(companyName: string): string {
     "essay_advice": "ES・ガクチカで刺さりやすい方向性（2〜3文）"
   },
   "links": {
-    "career_page": "公式採用ページURL",
+    "corporate_site": "企業の公式コーポレートサイトURL（トップページ、最も安定したURL）",
+    "career_page": "新卒採用ページURL（確実に正しいURLのみ。不明な場合はnull）",
     "openwork_search": "https://www.openwork.jp/search/?freeword=${companyName}",
     "onecareer_search": "https://www.onecareer.jp/search?q=${companyName}"
   }
@@ -90,7 +125,11 @@ export function buildCompanyDetailPrompt(companyName: string): string {
 - できる限り正確な情報を提供してください
 - 不確実な情報には「（推定）」や「（要確認）」と明記してください
 - URLは確認できるもののみ記載し、不明なものはnullとしてください
-- 新卒・技術系に焦点を当ててください`;
+- 新卒・技術系に焦点を当ててください
+- tech_stack にはその企業が使用している主要な技術をすべて列挙してください（数の制限なし）
+- products にはその企業の主要なプロダクト・サービスをすべて列挙してください（数の制限なし）
+- career_page はURLが頻繁に変わるため、確実に正しいURLのみ記載してください。不確実な場合はnullとしてください
+- corporate_site は企業のメインドメインのトップページURLを記載してください`;
 }
 
 export function buildReviewPrompt(

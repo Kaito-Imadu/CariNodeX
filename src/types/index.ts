@@ -27,6 +27,8 @@ export interface CompanyDetail {
   recruitment: {
     positions: { title: string; description: string }[];
     intern_period: string;
+    application_deadline: string;
+    interview_schedule: string;
     selection_flow: string;
     hiring_count: string;
   };
@@ -43,6 +45,7 @@ export interface CompanyDetail {
     essay_advice: string;
   };
   links: {
+    corporate_site: string | null;
     career_page: string | null;
     openwork_search: string;
     onecareer_search: string;
@@ -128,6 +131,20 @@ export interface ReviewHistoryItem {
   reviewedAt: string;
 }
 
+// === 検索履歴 ===
+export interface LastSearchParams {
+  keywords: string;
+  sizes: CompanySize[];
+}
+
+export interface SearchHistoryItem {
+  id: string;
+  keywords: string;
+  sizes: CompanySize[];
+  resultCount: number;
+  searchedAt: string;
+}
+
 // === ストレージ ===
 export interface AppData {
   version: number;
@@ -135,4 +152,7 @@ export interface AppData {
   profile: UserProfile;
   reviewHistory: ReviewHistoryItem[];
   searchCache: Record<string, { results: CompanySearchResult[]; cachedAt: string }>;
+  lastSearchParams: LastSearchParams | null;
+  searchHistory: SearchHistoryItem[];
+  companyDetailCache: Record<string, { detail: CompanyDetail; cachedAt: string }>;
 }

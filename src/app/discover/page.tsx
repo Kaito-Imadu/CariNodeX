@@ -1,21 +1,51 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SearchForm } from "@/components/SearchForm";
 import { SearchResultCard } from "@/components/CompanyCard";
 import { CompanyCardSkeleton } from "@/components/ui/Skeleton";
-import { CompanySearchResult, CompanySize } from "@/types";
-import { getCachedSearch, setCachedSearch } from "@/lib/storage";
+import { CompanySearchResult, CompanySize, SearchHistoryItem } from "@/types";
+import {
+  getCachedSearch,
+  setCachedSearch,
+  getLastSearchParams,
+  setLastSearchParams,
+  getSearchHistory,
+  addSearchHistory,
+  removeSearchHistory,
+} from "@/lib/storage";
 
 export default function DiscoverPage() {
   const [results, setResults] = useState<CompanySearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [initialKeywords, setInitialKeywords] = useState("");
+  const [initialSizes, setInitialSizes] = useState<CompanySize[]>([]);
+  const [searchFormKey, setSearchFormKey] = useState(0);
+  const [history, setHistory] = useState<SearchHistoryItem[]>([]);
   const lastSearchRef = useRef<number>(0);
+  const [restored, setRestored] = useState(false);
+
+  // mount 時に前回の検索結果を復元 & 履歴を読み込み
+  useEffect(() => {
+    setHistory(getSearchHistory());
+    const lastParams = getLastSearchParams();
+    if (lastParams) {
+      const cacheKey = `${lastParams.keywords}|${lastParams.sizes.sort().join(",")}`;
+      const cached = getCachedSearch(cacheKey);
+      if (cached) {
+        setResults(cached);
+        setHasSearched(true);
+        setInitialKeywords(lastParams.keywords);
+        setInitialSizes(lastParams.sizes);
+        setSearchFormKey((k) => k + 1);
+      }
+    }
+    setRestored(true);
+  }, []);
 
   async function handleSearch(keywords: string, sizes: CompanySize[]) {
-    // Debounce: prevent rapid fire
     const now = Date.now();
     if (now - lastSearchRef.current < 2000) return;
     lastSearchRef.current = now;
@@ -26,6 +56,9 @@ export default function DiscoverPage() {
       setResults(cached);
       setHasSearched(true);
       setError(null);
+      setLastSearchParams({ keywords, sizes });
+      addSearchHistory({ keywords, sizes, resultCount: cached.length });
+      setHistory(getSearchHistory());
       return;
     }
 
@@ -49,6 +82,9 @@ export default function DiscoverPage() {
       setResults(data.companies || []);
       if (data.companies?.length) {
         setCachedSearch(cacheKey, data.companies);
+        setLastSearchParams({ keywords, sizes });
+        addSearchHistory({ keywords, sizes, resultCount: data.companies.length });
+        setHistory(getSearchHistory());
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "予期しないエラーが発生しました");
@@ -57,6 +93,20 @@ export default function DiscoverPage() {
       setIsLoading(false);
     }
   }
+
+  function handleHistoryClick(item: SearchHistoryItem) {
+    setInitialKeywords(item.keywords);
+    setInitialSizes(item.sizes);
+    setSearchFormKey((k) => k + 1);
+    handleSearch(item.keywords, item.sizes);
+  }
+
+  function handleHistoryDelete(id: string) {
+    removeSearchHistory(id);
+    setHistory(getSearchHistory());
+  }
+
+  if (!restored) return null;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 pb-24 md:pb-8">
@@ -68,7 +118,13 @@ export default function DiscoverPage() {
       </div>
 
       <div className="glass rounded-2xl p-6 mb-8">
-        <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+        <SearchForm
+          key={searchFormKey}
+          onSearch={handleSearch}
+          isLoading={isLoading}
+          initialKeywords={initialKeywords}
+          initialSizes={initialSizes}
+        />
       </div>
 
       {error && (
@@ -104,15 +160,57 @@ export default function DiscoverPage() {
       )}
 
       {!hasSearched && (
-        <div className="text-center py-16 animate-fade-in">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <svg className="w-10 h-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-          </div>
-          <p className="text-foreground text-lg font-medium">キーワードを入力して検索</p>
-          <p className="text-muted text-sm mt-2">AIがあなたの興味に合った企業を10社レコメンドします</p>
+        <div className="animate-fade-in">
+          {history.length > 0 ? (
+            <div>
+              <h2 className="text-lg font-bold mb-4">検索履歴</h2>
+              <div className="space-y-2">
+                {history.map((item) => (
+                  <div
+                    key={item.id}
+                    className="glass rounded-xl p-4 flex items-center justify-between gap-3 hover:bg-surface-hover transition-colors cursor-pointer"
+                    onClick={() => handleHistoryClick(item)}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{item.keywords}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-muted">
+                          {item.sizes.join("・")}
+                        </span>
+                        <span className="text-xs text-muted">
+                          {item.resultCount}社
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleHistoryDelete(item.id);
+                      }}
+                      className="text-muted hover:text-danger transition-colors p-1 cursor-pointer"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <svg className="w-10 h-10 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+              </div>
+              <p className="text-foreground text-lg font-medium">キーワードを入力して検索</p>
+              <p className="text-muted text-sm mt-2">AIがあなたの興味に合った企業を10社レコメンドします</p>
+            </div>
+          )}
         </div>
       )}
     </div>
